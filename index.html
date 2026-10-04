@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viagem até a Quilonova</title>
+<style>
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:#04050c;color:#e8eaf6;font-family:system-ui,sans-serif;overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+#lens{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%)}
+#cap{position:fixed;left:0;right:0;bottom:calc(8% + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:#a9bbff;opacity:0;transition:opacity .8s;padding:0 16px;text-shadow:0 0 12px #000}
+#start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#04050c;z-index:5;text-align:center;padding:24px}
+#start h1{font-weight:300;letter-spacing:.3em;font-size:20px;margin:0}
+button{background:none;border:1px solid #9fb4ff;color:#cfd9ff;padding:12px 28px;border-radius:30px;font-size:15px;letter-spacing:.15em;cursor:pointer}
+button:hover{background:#9fb4ff22}
+#dim{position:fixed;inset:0;background:#04050c;opacity:0;transition:opacity 2s;pointer-events:none}
+#code{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;opacity:0;transition:opacity 2s;pointer-events:none}
+#code.on{opacity:1;pointer-events:auto}
+pre{margin:0;background:#161922;border-radius:14px;padding:22px 26px;font:16px/1.6 ui-monospace,Menlo,Consolas,monospace;min-width:260px;max-width:92vw;overflow-x:auto;box-shadow:0 0 60px #ff6b3d22;white-space:pre}
+.c{color:#6c7289}.k{color:#ff7b72}.b{color:#79c0ff}
+.cur{display:inline-block;width:8px;height:1.1em;background:#e8eaf6;vertical-align:text-bottom;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+#again{opacity:0;transition:opacity 1s}
+#code2{position:fixed;left:0;right:0;bottom:calc(4% + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;transition:opacity 2s;pointer-events:none}
+#code2.on{opacity:1}
+#pre2{background:rgba(14,16,26,.82);font-size:clamp(13px,3.7vw,16px)}
+.s{color:#a5d6a7}.f{color:#d2a8ff}
+#again2{opacity:0;transition:opacity 1s;pointer-events:auto}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="lens"></div>
+<div id="cap"></div>
+<div id="dim"></div>
+<div id="code"><pre id="pre"></pre><button id="again">↻ rever a viagem</button></div>
+<div id="code2"><pre id="pre2"></pre><button id="again2">↻ rever do início</button></div>
+<div id="start"><h1>VIAGEM ESTELAR</h1><div style="color:#8791b8;font-size:14px">Destino: um sinal a milhões de anos-luz…</div><button id="go">PARTIR</button></div>
+
+<script>
+// ✏️ Personalize aqui
+const CIDADE = "Jaboatão dos Guararapes";
+const CODIGO = `# analisando dados em\n# ${CIDADE}\n\nfor pessoa in milhões:\n    if pessoa == você:\n        encontrei = True\n\n# e eu te achei`;
+
+const NOME = "meu amor";
+const CODIGO2 = `# 1 ano a mais de você\nidade += 1\n\nwhile universo.existe():\n    amor += infinito\n\nprint("Feliz aniversário, Lindo")\n\n# gosto em todas as galáxias`;
+const cv = document.getElementById('cv'), g = cv.getContext('2d');
+const cap = document.getElementById('cap'), dim = document.getElementById('dim');
+const codeEl = document.getElementById('code'), pre = document.getElementById('pre'), again = document.getElementById('again');
+const R = Math.random, TAU = 6.283185;
+const TT = 30, MERGE = 8, BZ = 1100, CAM_END = 800, F = .9;  // F * min(W,H) = distância focal
+let W, H, DPR, cx, cy, m, bg = [], sts = [], objs = [], parts = [], rings = [], t0 = null, running = false, typer = null, lastRing = 0, capIdx = 0, pz = 0;
+let mode = 1, tp2 = null, objs2 = [], p2timer = null, tms = [], c1 = 0, c2 = 0;
+const code2El = document.getElementById('code2'), pre2 = document.getElementById('pre2'), again2 = document.getElementById('again2');
+let typer2 = null;
+
+// ---------- mundo ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+function blobs(n, z0, z1, spread, cols){
+  return Array.from({length: n}, () => ({z: z0 + R()*(z1-z0), x: (R()-.5)*spread, y: (R()-.5)*spread, R: 60 + R()*90, col: cols[(R()*cols.length)|0]}));
+}
+function build(){
+  sts = Array.from({length: 450}, () => ({x: (R()-.5)*700, y: (R()-.5)*700, z: R()*1300, h: R()<.2 ? 20 : R()<.5 ? 210 : 45}));
+  objs = [
+    {k:'p', z:70,  x:-42, y:14, R:36, c:['#f5d9a8','#c98a4b','#3a2010'], bands:1},
+    {k:'p', z:150, x:36,  y:-12, R:30, c:['#fff0c8','#d8b878','#403018'], bands:1, ring:1},
+    {k:'p', z:215, x:-30, y:-22, R:24, c:['#d6f6ff','#5fb4e8','#0c2a4a']},
+    {k:'s', z:500, x:34,  y:-14, R:34, col:[255,120,60]},
+    {k:'s', z:560, x:-30, y:18,  R:10, col:[150,190,255]},
+    {k:'s', z:585, x:26,  y:26,  R:8,  col:[190,210,255]},
+    {k:'p', z:745, x:34,  y:-6,  R:30, c:['#ffb48a','#d2431e','#2a0a04'], bands:1},
+    {k:'bin', z:BZ}
+  ];
+  [...blobs(26, 290, 420, 150, ['#c0409a','#7a3ad0','#ff7ab0']),
+   ...blobs(26, 600, 730, 150, ['#2a8ad0','#20c0b0','#5a6aff']),
+   ...blobs(30, 1180, 1300, 260, ['#a03060','#5a2a9a','#d0602a'])].forEach(b => objs.push({k:'nb', ...b}));
+}
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = cv.width = innerWidth*DPR; H = cv.height = innerHeight*DPR; cx = W/2; cy = H/2; m = Math.min(W, H);
+  bg = Array.from({length: 220}, () => ({x: R()*W, y: R()*H, r: (R()*1.2+.3)*DPR, p: R()*TAU, s: R()*2+1}));
+}
+addEventListener('resize', resize); resize(); build();
+
+// ---------- desenho ----------
+function glow(x, y, r, col, a){
+  const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(1, `rgba(${col},0)`);
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+}
+function ring(x, y, r, half){
+  g.save(); g.translate(x, y); g.rotate(-.35); g.scale(1, .28);
+  g.strokeStyle = 'rgba(230,205,150,.75)'; g.lineWidth = r*.3; g.beginPath(); g.arc(0, 0, r*1.75, 0, half ? Math.PI : TAU); g.stroke(); g.restore();
+}
+function planet(o, sc, al){
+  const x = cx + o.x*sc, y = cy + o.y*sc, r = o.R*sc; if (r < .6) return;
+  g.globalAlpha = al; g.globalCompositeOperation = 'source-over';
+  if (o.ring) ring(x, y, r, 0);
+  g.save(); g.beginPath(); g.arc(x, y, r, 0, TAU); g.clip();
+  const gr = g.createRadialGradient(x-r*.4, y-r*.4, r*.1, x, y, r);
+  gr.addColorStop(0, o.c[0]); gr.addColorStop(.55, o.c[1]); gr.addColorStop(1, o.c[2]);
+  g.fillStyle = gr; g.fillRect(x-r, y-r, 2*r, 2*r);
+  if (o.bands) for (let i = -5; i <= 5; i++){ g.fillStyle = `rgba(0,0,0,${i%2 ? .16 : .06})`; g.fillRect(x-r, y + i*r*.17 - r*.04, 2*r, r*.1); }
+  const sh = g.createRadialGradient(x-r*.5, y-r*.5, r*.55, x, y, r*1.3); sh.addColorStop(0, 'transparent'); sh.addColorStop(1, 'rgba(0,0,12,.9)');
+  g.fillStyle = sh; g.fillRect(x-r, y-r, 2*r, 2*r); g.restore();
+  if (o.ring) ring(x, y, r, 1);
+}
+function star(o, sc, al){
+  const x = cx + o.x*sc, y = cy + o.y*sc, r = o.R*sc; if (r < .4) return;
+  const c = o.col.join(','); g.globalCompositeOperation = 'lighter'; g.globalAlpha = al;
+  glow(x, y, r*4, c, .35); glow(x, y, r*1.6, c, .9); glow(x, y, r*.7, '255,255,255', 1);
+  g.strokeStyle = `rgba(${c},.5)`; g.lineWidth = DPR; g.beginPath(); g.moveTo(x-r*5, y); g.lineTo(x+r*5, y); g.moveTo(x, y-r*5); g.lineTo(x, y+r*5); g.stroke();
+}
+function ns(x, y, r, col){ r = Math.max(r, 1.3*DPR); glow(x, y, r*5, col, .8); glow(x, y, r*1.2, '255,255,255', 1); }
+
+function binary(sc, t){
+  const tm = t - TT, p = clamp(tm/MERGE);
+  const sep = 3 + 57*Math.sqrt(1 - p*p), th0 = TT*1.2, th = tm < 0 ? t*1.2 : th0 + 1.2*tm + 15*MERGE*Math.pow(p, 4);
+  const sx = Math.cos(th)*sep*sc, sy = Math.sin(th)*sep*sc*.45, r = 3*sc;
+  g.globalCompositeOperation = 'lighter'; g.globalAlpha = 1;
+  ns(cx + sx, cy + sy, r, '110,170,255'); ns(cx - sx, cy - sy, r, '180,150,255');
+  if (tm >= 0 && tm < MERGE){
+    if (t - lastRing > Math.max(.12, .9*(1-p))){ rings.push(t); lastRing = t; }
+  }
+}
+
+function burst(){
+  parts = [];
+  for (let i = 0; i < 520; i++){
+    const jet = R() < .3, a = jet ? (R()<.5 ? -1 : 1)*Math.PI/2 + (R()-.5)*.35 : R()*TAU;
+    parts.push({a, v: (jet ? .9 : .25)*(R()*.9+.1)*m*.05, r: (R()*2+.8)*DPR, gold: R() < .12});
+  }
+}
+
+// ---------- legendas e código ----------
+const caps = [[0,"Partindo do Sistema Solar…"],[40,"Gigantes de gás e anéis de gelo"],[240,"Cruzando uma nebulosa"],[470,"Estrelas gigantes e vermelhas"],[600,"Berçário de estrelas azuis"],[720,"Um sinal gravitacional à frente…"],
+  [1000,"Duas estrelas de nêutrons em espiral"],[1000+MERGE-1,"Ondas gravitacionais detectadas"],[1000+MERGE+2,"KILONOVA"],[1000+MERGE+5.5,"Ouro e platina nascem aqui"],[1000+MERGE+7,""]];
+function setCap(txt){ cap.style.opacity = 0; setTimeout(() => { cap.textContent = txt; cap.style.opacity = txt ? 1 : 0; }, 300); }
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function hl(src){
+  return src.split('\n').map(l => esc(l).replace(/(#.*$)|("[^"]*")|\b(for|in|if|while|def|return|else|not)\b|\b(True|False|None)\b|\b(print)\b/g,
+    (m, c, s, k, b, f) => c ? `<span class="c">${c}</span>` : s ? `<span class="s">${s}</span>` : k ? `<span class="k">${k}</span>` : b ? `<span class="b">${b}</span>` : `<span class="f">${f}</span>`)).join('\n');
+}
+function typeInto(box, text, done){
+  let n = 0; const id = setInterval(() => {
+    n++; box.innerHTML = hl(text.slice(0, n)) + '<span class="cur"></span>';
+    if (n >= text.length){ clearInterval(id); done && done(); }
+  }, 65);
+  return id;
+}
+function startTyping(){
+  codeEl.classList.add('on'); dim.style.opacity = .78;
+  typer = typeInto(pre, CODIGO, () => { p2timer = setTimeout(phase2, 7000); });
+}
+
+// ---------- loop ----------
+function frame(now){
+  if (!running) return;
+  if (t0 === null) t0 = now;
+  if (mode === 2){ draw2(now); requestAnimationFrame(frame); return; }
+  const t = (now - t0)/1000, f = F*m, u = clamp(t/TT), camz = CAM_END*(1 - (1-u)*(1-u)), speed = (camz - pz);
+  const P = t < TT ? camz : 1000 + (t - TT);
+  while (capIdx < caps.length && P > caps[capIdx][0]) setCap(caps[capIdx++][1]);
+  if (t > TT + MERGE + 7 && !typer && !codeEl.classList.contains('on')) startTyping();
+
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#04050c'; g.fillRect(0, 0, W, H);
+  bg.forEach(s => { g.globalAlpha = .3 + .5*Math.sin(t*s.s + s.p)**2; g.fillStyle = '#fff'; g.beginPath(); g.arc(s.x, s.y, s.r, 0, TAU); g.fill(); });
+
+  // estrelas 3D com rastro de velocidade
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+  sts.forEach(s => {
+    const dz = s.z - camz; if (dz < 3) return;
+    const sc = f/dz, x = cx + s.x*sc, y = cy + s.y*sc; if (x < 0 || x > W || y < 0 || y > H) return;
+    const pd = s.z - pz, ps = f/Math.max(pd, 3), px = cx + s.x*ps, py = cy + s.y*ps;
+    g.strokeStyle = `hsla(${s.h},80%,85%,${clamp(1.1 - dz/900)})`; g.lineWidth = Math.max(1, Math.min(2.6, sc*40))*DPR;
+    g.beginPath(); g.moveTo(speed > .25 ? px : x, speed > .25 ? py : y); g.lineTo(x + .01, y); g.stroke();
+  });
+  pz = camz;
+
+  // objetos, do mais distante ao mais próximo
+  objs.slice().sort((a, b) => b.z - a.z).forEach(o => {
+    const dz = o.z - camz; if (dz < 6) return;
+    const sc = f/dz, al = clamp((dz - 6)/24) * clamp((1500 - dz)/300);
+    if (o.k === 'nb'){
+      g.globalCompositeOperation = 'lighter'; g.globalAlpha = 1;
+      const c = parseInt(o.col.slice(1), 16), rgb = `${c>>16},${(c>>8)&255},${c&255}`;
+      glow(cx + o.x*sc, cy + o.y*sc, o.R*sc, rgb, .09*al);
+    } else if (o.k === 'p') planet(o, sc, al);
+    else if (o.k === 's') star(o, sc, al);
+    else if (o.k === 'bin') binary(sc, t);
+  });
+
+  // ondas gravitacionais
+  g.globalCompositeOperation = 'source-over'; g.lineWidth = DPR;
+  rings = rings.filter(r => t - r < 3);
+  const pm = clamp((t - TT)/MERGE);
+  rings.forEach(r => { const k = (t - r)/3; g.strokeStyle = `rgba(140,170,255,${(1-k)*.4*(.3+pm)})`; g.beginPath(); g.ellipse(cx, cy, m*.7*k + 10, m*.7*k*.45 + 5, 0, 0, TAU); g.stroke(); });
+
+  // quilonova
+  const a = t - (TT + MERGE);
+  if (a > 0){
+    g.globalCompositeOperation = 'lighter';
+    const Rr = m*(.08 + .5*(1 - Math.exp(-a/3))), k = clamp(a/8), fade = Math.max(0, 1 - Math.max(0, a-6)/8);
+    const col = `${Math.round(120+135*k)},${Math.round(160-100*k)},${Math.round(255-215*k)}`;
+    glow(cx, cy, Rr, col, .75*fade);
+    if (a < 2.5){ g.globalAlpha = 1 - a/2.5; g.strokeStyle = '#fff'; g.lineWidth = 3*DPR; g.beginPath(); g.arc(cx, cy, m*.9*(a/2.5)**.6, 0, TAU); g.stroke(); }
+    parts.forEach(q => {
+      const d = q.v*(1 - Math.exp(-a/2.2))*11;
+      g.globalAlpha = fade*.9;
+      g.fillStyle = q.gold ? '#ffd24a' : `rgb(${Math.round(120+135*k)},${Math.round(150-90*k)},${Math.round(255-215*k)})`;
+      g.beginPath(); g.arc(cx + Math.cos(q.a)*d, cy + Math.sin(q.a)*d, q.r*(1.2 - .4*k), 0, TAU); g.fill();
+    });
+    if (a < 1.6){ g.globalAlpha = (1 - a/1.6)**2; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
+  }
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  requestAnimationFrame(frame);
+}
+
+// ---------- fase 2: viagem até a nebulosa ----------
+const ZN = 950, HZ = 1150, TRAVEL2 = 17;
+function phase2(){
+  const cols = ['#2ac8b0','#3a6aff','#c0408a','#ff7a4a'];
+  objs2 = [];
+  for (let i = 0; i < 40; i++) objs2.push({k:'nb', z: 400 + R()*850, x: (R()-.5)*320, y: (R()-.5)*320, R: 70 + R()*100, col: cols[(R()*cols.length)|0]});
+  objs2.push({k:'hg', z: HZ, x: 0, y: -55});
+  objs2.push({k:'p', z:170, x:-32, y:10, R:28, c:['#ffe0f0','#c070c0','#2a1040'], bands:1, ring:1});
+  codeEl.classList.remove('on'); dim.style.opacity = 0; mode = 2; tp2 = null; pz = 0; c1 = c2 = 0;
+  setCap("Rumo à Nebulosa da Ampulheta…");
+}
+function showMsg(){
+  code2El.classList.add('on');
+  typer2 = typeInto(pre2, CODIGO2, () => { again2.style.opacity = 1; });
+}
+let hgSprite = null;
+function makeHG(){
+  const w = 640, h = 900, c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), mx = w/2, my = h/2; x.globalCompositeOperation = 'lighter';
+  const soft = (path, col, lw, a) => { for (let i = 0; i < 7; i++){ x.strokeStyle = `rgba(${col},${a*(1 - i/7)*.5})`; x.lineWidth = lw*(1 + i*1.1); path(); x.stroke(); } };
+  const tc = ['70,255,200','90,150,255','255,95,70'];
+  for (const sg of [-1, 1]){
+    const ey = my + sg*165, E = k => () => { x.beginPath(); x.ellipse(mx, ey, 150*k, 195*k, 0, 0, TAU); };
+    x.save(); x.beginPath(); x.rect(0, sg < 0 ? 0 : my, w, my); x.clip();
+    const gr = x.createRadialGradient(mx, ey, 20, mx, ey, 200);
+    gr.addColorStop(0, 'rgba(255,90,60,0)'); gr.addColorStop(.7, 'rgba(255,90,60,.10)'); gr.addColorStop(1, 'rgba(60,255,190,.14)');
+    x.fillStyle = gr; E(1)(); x.fill();
+    soft(E(1), tc[0], 2, .9); soft(E(.86), tc[1], 2, .55); soft(E(.72), tc[2], 2.5, .6);
+    for (let i = 0; i < 50; i++){
+      const k = .55 + R()*.45, a0 = R()*TAU;
+      x.strokeStyle = `rgba(${tc[(R()*3)|0]},${.06 + R()*.14})`; x.lineWidth = .8 + R()*1.6;
+      x.beginPath(); x.ellipse(mx + (R()-.5)*10, ey + (R()-.5)*12, 150*k, 195*k, 0, a0, a0 + .4 + R()*1.2); x.stroke();
+    }
+    for (let i = 0; i < 450; i++){
+      const r = Math.sqrt(R()), a = R()*TAU;
+      x.fillStyle = `rgba(255,255,255,${.04 + R()*.16*r})`; x.beginPath(); x.arc(mx + Math.cos(a)*150*r, ey + Math.sin(a)*195*r, .6 + R()*.9, 0, TAU); x.fill();
+    }
+    x.restore();
+  }
+  const cg = x.createRadialGradient(mx, my, 0, mx, my, 130);
+  cg.addColorStop(0, 'rgba(255,255,255,.95)'); cg.addColorStop(.12, 'rgba(180,210,255,.6)'); cg.addColorStop(.4, 'rgba(255,140,80,.22)'); cg.addColorStop(1, 'rgba(255,90,60,0)');
+  x.fillStyle = cg; x.beginPath(); x.arc(mx, my, 130, 0, TAU); x.fill();
+  soft(() => { x.beginPath(); x.ellipse(mx, my, 92, 26, 0, 0, TAU); }, '255,175,100', 3, 1);
+  soft(() => { x.beginPath(); x.ellipse(mx, my, 62, 17, 0, 0, TAU); }, '255,230,200', 2, .7);
+  return c;
+}
+function hourglass(o, sc, al, t){
+  if (!hgSprite) hgSprite = makeHG();
+  const Hh = 240*sc, Ww = Hh*640/900;
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = al*(.93 + .07*Math.sin(t*1.3));
+  g.translate(cx + o.x*sc, cy + o.y*sc); g.rotate(-.28 + Math.sin(t*.15)*.02); g.drawImage(hgSprite, -Ww/2, -Hh/2, Ww, Hh); g.restore();
+}
+function draw2(now){
+  if (tp2 === null) tp2 = now;
+  const t = (now - tp2)/1000, f = F*m, u = clamp(t/TRAVEL2), camz = ZN*(1 - Math.pow(1-u, 2.2)), speed = camz - pz;
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#04050c'; g.fillRect(0, 0, W, H);
+  bg.forEach(s => { g.globalAlpha = .3 + .5*Math.sin(t*s.s + s.p)**2; g.fillStyle = '#fff'; g.beginPath(); g.arc(s.x, s.y, s.r, 0, TAU); g.fill(); });
+  g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+  sts.forEach(s => {
+    const dz = s.z - camz; if (dz < 3) return;
+    const sc = f/dz, x = cx + s.x*sc, y = cy + s.y*sc; if (x < 0 || x > W || y < 0 || y > H) return;
+    const pd = s.z - pz, ps = f/Math.max(pd, 3), px = cx + s.x*ps, py = cy + s.y*ps;
+    g.strokeStyle = `hsla(${s.h},80%,85%,${clamp(1.1 - dz/900)})`; g.lineWidth = Math.max(1, Math.min(2.6, sc*40))*DPR;
+    g.beginPath(); g.moveTo(speed > .25 ? px : x, speed > .25 ? py : y); g.lineTo(x + .01, y); g.stroke();
+  });
+  pz = camz;
+  objs2.slice().sort((a, b) => b.z - a.z).forEach(o => {
+    const dz = o.z - camz; if (dz < 6) return;
+    const sc = f/dz, al = clamp((dz - 6)/24) * clamp((1500 - dz)/300);
+    if (o.k === 'nb'){
+      g.globalCompositeOperation = 'lighter'; g.globalAlpha = 1;
+      const c = parseInt(o.col.slice(1), 16);
+      glow(cx + o.x*sc, cy + o.y*sc, o.R*sc, `${c>>16},${(c>>8)&255},${c&255}`, .10*al);
+    } else if (o.k === 'hg') hourglass(o, sc, al, t); else if (o.k === 'p') planet(o, sc, al); else star(o, sc, al);
+  });
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  if (t > 6 && !c1){ c1 = 1; setCap("A Nebulosa da Ampulheta se aproxima…"); }
+  if (t > TRAVEL2 - 4 && !c2){ c2 = 1; cap.style.bottom = 'auto'; cap.style.top = 'calc(6% + env(safe-area-inset-top,0px))'; setCap('Nebulosa da Ampulheta · MyCn18'); showMsg(); }
+}
+
+function play(){
+  clearInterval(typer); typer = null; clearTimeout(p2timer); clearInterval(typer2); tms.forEach(clearTimeout); tms = []; mode = 1; cap.style.top = ''; cap.style.bottom = '';
+  rings = []; lastRing = 0; capIdx = 0; t0 = null; pz = 0;
+  code2El.classList.remove('on'); again2.style.opacity = 0; pre2.innerHTML = '';
+  codeEl.classList.remove('on'); dim.style.opacity = 0; again.style.opacity = 0; pre.innerHTML = '';
+  burst(); const was = running; running = true; if (!was) requestAnimationFrame(frame);
+}
+document.getElementById('go').onclick = () => { document.getElementById('start').style.display = 'none'; play(); };
+again.onclick = play; again2.onclick = play;
+</script>
+</body>
+</html>
+Feliz
