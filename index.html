@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Viagem até a Quilonova</title>
+<title>Uma Intensa Viagem</title>
 <style>
 :root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{height:100%;margin:0;background:#04050c;color:#e8eaf6;font-family:system-ui,sans-serif;overflow:hidden}
 canvas{position:fixed;inset:0;width:100%;height:100%}
 #lens{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%)}
-#cap{position:fixed;left:0;right:0;bottom:calc(8% + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:#a9bbff;opacity:0;transition:opacity .8s;padding:0 16px;text-shadow:0 0 12px #000}
+#cap{position:fixed;left:0;right:0;bottom:calc(8% + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:#a9bbff;opacity:0;transition:opacity .8s;padding:0 16px;text-shadow:0 0 12px #000;z-index:2;pointer-events:none}
 #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#04050c;z-index:5;text-align:center;padding:24px}
 #start h1{font-weight:300;letter-spacing:.3em;font-size:20px;margin:0}
 button{background:none;border:1px solid #9fb4ff;color:#cfd9ff;padding:12px 28px;border-radius:30px;font-size:15px;letter-spacing:.15em;cursor:pointer}
@@ -22,11 +22,17 @@ pre{margin:0;background:#161922;border-radius:14px;padding:22px 26px;font:16px/1
 .cur{display:inline-block;width:8px;height:1.1em;background:#e8eaf6;vertical-align:text-bottom;animation:bl 1s steps(1) infinite}
 @keyframes bl{50%{opacity:0}}
 #again{opacity:0;transition:opacity 1s}
-#code2{position:fixed;left:0;right:0;bottom:calc(4% + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;transition:opacity 2s;pointer-events:none}
+#code2{position:fixed;left:0;right:0;top:calc(36% + env(safe-area-inset-top,0px));bottom:calc(3% + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;padding:0 14px;box-sizing:border-box;opacity:0;transition:opacity 2s;pointer-events:none}
 #code2.on{opacity:1}
-#pre2{background:rgba(14,16,26,.82);font-size:clamp(13px,3.7vw,16px)}
+#letter{position:relative;box-sizing:border-box;width:min(560px,100%);min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;pointer-events:auto;padding:22px 24px 20px;border-radius:20px;background:rgba(6,8,20,.58);border:1px solid rgba(170,190,255,.18);box-shadow:0 0 80px rgba(90,110,255,.16);font:italic clamp(15px,4.1vw,19px)/1.75 Georgia,"Iowan Old Style","Palatino Linotype",serif;color:#eef1ff;text-shadow:0 1px 10px rgba(0,0,0,.85);scrollbar-width:thin;scrollbar-color:#9fb4ff55 transparent}
+#letter p{margin:0 0 1.05em;white-space:pre-line;opacity:0;transform:translateY(10px);transition:opacity 1.8s ease,transform 1.8s ease}
+#letter p.on{opacity:1;transform:none}
+#letter p.to{color:#ffd9a6;font-size:1.18em;margin-bottom:.35em}
+#letter p.fe{font-size:1.25em;text-align:center;margin:1.1em 0 .2em;color:#fff}
+#letter p.fim{color:#ffd9a6;margin:1.1em 0 0;text-align:right}
+@media (min-aspect-ratio:11/10){#cap.side{right:auto;width:54%}#code2{left:auto;right:4%;width:min(540px,46vw);top:calc(5% + env(safe-area-inset-top,0px));bottom:calc(4% + env(safe-area-inset-bottom,0px));justify-content:center;padding:0}}
 .s{color:#a5d6a7}.f{color:#d2a8ff}
-#again2{opacity:0;transition:opacity 1s;pointer-events:auto}
+#again2{opacity:0;transition:opacity 1s;pointer-events:auto;flex:none}
 </style>
 </head>
 <body>
@@ -35,7 +41,7 @@ pre{margin:0;background:#161922;border-radius:14px;padding:22px 26px;font:16px/1
 <div id="cap"></div>
 <div id="dim"></div>
 <div id="code"><pre id="pre"></pre><button id="again">↻ rever a viagem</button></div>
-<div id="code2"><pre id="pre2"></pre><button id="again2">↻ rever do início</button></div>
+<div id="code2"><div id="letter"></div><button id="again2">↻ rever do início</button></div>
 <div id="start"><h1>VIAGEM ESTELAR</h1><div style="color:#8791b8;font-size:14px">Destino: um sinal a milhões de anos-luz…</div><button id="go">PARTIR</button></div>
 
 <script>
@@ -46,7 +52,16 @@ const CODIGO = `# analisando dados em\n# ${CIDADE}\n\nfor pessoa in milhões:\n 
 const NOME = "meu amor";
 
 
-const CODIGO2 = `# 1 ano a mais de você\nidade += 1\n\nwhile universo.existe():\n    amor += infinito\n\nprint("Feliz aniversário, Lindo")\n\n# gosto em todas as galáxias`;
+const CARTA = [
+  ["to", "Vitor,"],
+  ["to", "Meu amor,"],
+  ["", "Nós dois éramos como duas estrelas que giravam sozinhas, e de repente, uma fusão que mudou tudo! Foi como uma quilonova: intenso, belo e deixou o universo inteiro diferente..."],
+  ["", "Apesar dos improváveis, aconteceu e acontece todos os dias quando a gente se conecta de alguma maneira.\nAinda assim, quando o contrário, minha mente está sempre ligada a sua e meu pensamento viaja ao teu encontro."],
+  ["", "Que neste dia que o Senhor escolheu pra você vir nessa terra e em algum momento cruzar meu caminho, quero que saiba que tu é mais do que eu esperava em alguém,\nSorrio demaissssss com você, tu é inteligente pra caramba, literalmente tudo que diz respeito a você eu quero saber e acho interessante."],
+  ["", "Te amo, meu bem!\nQuero dividir minha vida inteira com você!\nEncontrei você e foi o encontro da minha vida."],
+  ["fe", "Feliz aniversário!!!"],
+  ["fim", "Com amor, da sua Ju."]
+];
 
 
 
@@ -57,7 +72,9 @@ const R = Math.random, TAU = 6.283185;
 const TT = 30, MERGE = 8, BZ = 1100, CAM_END = 800, F = .9;  // F * min(W,H) = distância focal
 let W, H, DPR, cx, cy, m, bg = [], sts = [], objs = [], parts = [], rings = [], t0 = null, running = false, typer = null, lastRing = 0, capIdx = 0, pz = 0;
 let mode = 1, tp2 = null, objs2 = [], p2timer = null, tms = [], c1 = 0, c2 = 0;
-const code2El = document.getElementById('code2'), pre2 = document.getElementById('pre2'), again2 = document.getElementById('again2');
+const code2El = document.getElementById('code2'), letter = document.getElementById('letter'), again2 = document.getElementById('again2');
+let userScroll = false;
+['wheel', 'touchstart'].forEach(ev => letter.addEventListener(ev, () => { userScroll = true; }, {passive: true}));
 let typer2 = null;
 
 // ---------- mundo ----------
@@ -222,60 +239,93 @@ function frame(now){
 }
 
 // ---------- fase 2: viagem até a nebulosa ----------
-const ZN = 950, HZ = 1150, TRAVEL2 = 17;
+const ZN = 880, HZ = 1150, TRAVEL2 = 17;
 function phase2(){
   const cols = ['#2ac8b0','#3a6aff','#c0408a','#ff7a4a'];
   objs2 = [];
   for (let i = 0; i < 40; i++) objs2.push({k:'nb', z: 400 + R()*850, x: (R()-.5)*320, y: (R()-.5)*320, R: 70 + R()*100, col: cols[(R()*cols.length)|0]});
-  objs2.push({k:'hg', z: HZ, x: 0, y: -55});
+  objs2.push({k:'hg', z: HZ, x: 0, y: 0});
   objs2.push({k:'p', z:170, x:-32, y:10, R:28, c:['#ffe0f0','#c070c0','#2a1040'], bands:1, ring:1});
   codeEl.classList.remove('on'); dim.style.opacity = 0; mode = 2; tp2 = null; pz = 0; c1 = c2 = 0;
   setCap("Rumo à Nebulosa da Ampulheta…");
 }
+function follow(p){
+  if (userScroll) return;
+  if (p.offsetTop + p.offsetHeight > letter.scrollTop + letter.clientHeight - 16)
+    letter.scrollTo({top: Math.max(0, p.offsetTop - letter.clientHeight*.22), behavior: 'smooth'});
+}
 function showMsg(){
-  code2El.classList.add('on');
-  typer2 = typeInto(pre2, CODIGO2, () => { again2.style.opacity = 1; });
+  code2El.classList.add('on'); dim.style.opacity = .3; userScroll = false;
+  letter.innerHTML = ''; letter.scrollTop = 0;
+  let delay = 900;
+  CARTA.forEach(([cls, txt]) => {
+    const p = document.createElement('p'); p.className = cls; p.textContent = txt; letter.appendChild(p);
+    tms.push(setTimeout(() => { p.classList.add('on'); follow(p); }, delay));
+    delay += 900 + txt.length*34;
+  });
+  tms.push(setTimeout(() => { again2.style.opacity = 1; }, delay + 600));
+}
+
+// ---- Nebulosa da Ampulheta (MyCn18): sprite procedural + camadas vivas ----
+const SW = 640, SH = 920, HGS = [];
+const hsh = (x, y) => { let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0)/4294967295; };
+const sm = t => t*t*(3 - 2*t);
+function vn(x, y){ const xi = Math.floor(x), yi = Math.floor(y), u = sm(x - xi), v = sm(y - yi), a = hsh(xi, yi), b = hsh(xi+1, yi), c = hsh(xi, yi+1), d = hsh(xi+1, yi+1); return a + (b-a)*u + (c-a)*v + (a-b-c+d)*u*v; }
+function fbm(x, y){ let s = 0, a = .5; for (let i = 0; i < 4; i++){ s += a*vn(x, y); x = x*2.03 + 17.1; y = y*2.03 + 9.2; a *= .5; } return s/.9375; }
+const gs = (v, c, w) => Math.exp(-(((v - c)/w)**2));
+for (let i = 0; HGS.length < 90 && i < 3000; i++){
+  const sg = R() < .5 ? -1 : 1, a = R()*TAU, rr = Math.sqrt(R())*1.1, y = sg*170 + Math.sin(a)*195*rr;
+  if (sg*y > 8) HGS.push({x: Math.cos(a)*150*rr, y, r: 2 + R()*4, s: .6 + R()*1.6, p: R()*TAU});
 }
 let hgSprite = null;
-function makeHG(){
-  const w = 640, h = 900, c = document.createElement('canvas'); c.width = w; c.height = h;
-  const x = c.getContext('2d'), mx = w/2, my = h/2; x.globalCompositeOperation = 'lighter';
-  const soft = (path, col, lw, a) => { for (let i = 0; i < 7; i++){ x.strokeStyle = `rgba(${col},${a*(1 - i/7)*.5})`; x.lineWidth = lw*(1 + i*1.1); path(); x.stroke(); } };
-  const tc = ['70,255,200','90,150,255','255,95,70'];
-  for (const sg of [-1, 1]){
-    const ey = my + sg*165, E = k => () => { x.beginPath(); x.ellipse(mx, ey, 150*k, 195*k, 0, 0, TAU); };
-    x.save(); x.beginPath(); x.rect(0, sg < 0 ? 0 : my, w, my); x.clip();
-    const gr = x.createRadialGradient(mx, ey, 20, mx, ey, 200);
-    gr.addColorStop(0, 'rgba(255,90,60,0)'); gr.addColorStop(.7, 'rgba(255,90,60,.10)'); gr.addColorStop(1, 'rgba(60,255,190,.14)');
-    x.fillStyle = gr; E(1)(); x.fill();
-    soft(E(1), tc[0], 2, .9); soft(E(.86), tc[1], 2, .55); soft(E(.72), tc[2], 2.5, .6);
-    for (let i = 0; i < 50; i++){
-      const k = .55 + R()*.45, a0 = R()*TAU;
-      x.strokeStyle = `rgba(${tc[(R()*3)|0]},${.06 + R()*.14})`; x.lineWidth = .8 + R()*1.6;
-      x.beginPath(); x.ellipse(mx + (R()-.5)*10, ey + (R()-.5)*12, 150*k, 195*k, 0, a0, a0 + .4 + R()*1.2); x.stroke();
+function buildHG(){   // monta em pedaços para não travar a tela inicial
+  const c = document.createElement('canvas'); c.width = SW; c.height = SH;
+  const x = c.getContext('2d'), img = x.createImageData(SW, SH), d = img.data, A = 150, B = 195, C = 170; let py = 0;
+  (function chunk(){
+    for (const end = Math.min(SH, py + 40); py < end; py++) for (let px = 0; px < SW; px++){
+      const X = px - SW/2, Y = py - SH/2; let r = 0, gg = 0, b = 0;
+      for (const sg of [-1, 1]){
+        const w = clamp((sg*Y + 6)/20); if (w <= 0) continue;
+        const u = X/A, v = (Y - sg*C)/B, rho = Math.sqrt(u*u + v*v); if (rho > 1.5) continue;
+        const th = Math.atan2(v, u), n = fbm(X*.011 + sg*7, Y*.011), re = rho + (n - .5)*.07;
+        const fil = .2 + 1.6*clamp((fbm(Math.cos(th)*4 + 20, Math.sin(th)*4 + rho*1.7) - .32)/.4);
+        const o = gs(re, 1, .04)*fil, mid = gs(re, .86, .05)*fil*.7, inn = gs(re, .7, .07)*fil*.75, ha = gs(re, 1.05, .22)*.3, fl = (rho < 1 ? (.10 + .24*rho*rho)*(.45 + n) : 0) + gs(rho, .35, .4)*.16*(.5 + n);
+        r  += w*(o + mid*.27 + inn*.35 + fl*.5 + ha*.2);       // casca externa: vermelho · meio: verde-água · interna: azul
+        gg += w*(o*.38 + mid + inn*.58 + fl*.25 + ha*.7);
+        b  += w*(o*.26 + mid*.75 + inn + fl*.8 + ha*.8);
+      }
+      const q1 = gs(Math.sqrt((X/100)**2 + (Y/28)**2), 1, .13), q2 = gs(Math.sqrt((X/64)**2 + (Y/18)**2), 1, .14), rr = X*X + Y*Y,
+            c1 = Math.exp(-rr/(2*38*38)), c2 = Math.exp(-rr/(2*10*10)), wa = Math.exp(-(((X/70)**2) + ((Y/46)**2)));
+      r  += q1 + q2 + c1*.55 + c2 + wa*.25;
+      gg += q1*.68 + q2*.9 + c1*.4 + c2*.95 + wa*.12;
+      b  += q1*.4 + q2*.8 + c1*.3 + c2 + wa*.05;
+      const i = (py*SW + px)*4;
+      d[i] = 255*(1 - Math.exp(-r*1.15)); d[i+1] = 255*(1 - Math.exp(-gg*1.15)); d[i+2] = 255*(1 - Math.exp(-b*1.15)); d[i+3] = 255;
     }
-    for (let i = 0; i < 450; i++){
-      const r = Math.sqrt(R()), a = R()*TAU;
-      x.fillStyle = `rgba(255,255,255,${.04 + R()*.16*r})`; x.beginPath(); x.arc(mx + Math.cos(a)*150*r, ey + Math.sin(a)*195*r, .6 + R()*.9, 0, TAU); x.fill();
-    }
-    x.restore();
-  }
-  const cg = x.createRadialGradient(mx, my, 0, mx, my, 130);
-  cg.addColorStop(0, 'rgba(255,255,255,.95)'); cg.addColorStop(.12, 'rgba(180,210,255,.6)'); cg.addColorStop(.4, 'rgba(255,140,80,.22)'); cg.addColorStop(1, 'rgba(255,90,60,0)');
-  x.fillStyle = cg; x.beginPath(); x.arc(mx, my, 130, 0, TAU); x.fill();
-  soft(() => { x.beginPath(); x.ellipse(mx, my, 92, 26, 0, 0, TAU); }, '255,175,100', 3, 1);
-  soft(() => { x.beginPath(); x.ellipse(mx, my, 62, 17, 0, 0, TAU); }, '255,230,200', 2, .7);
-  return c;
+    if (py < SH) setTimeout(chunk, 0); else { x.putImageData(img, 0, 0); hgSprite = c; }
+  })();
 }
+buildHG();
 function hourglass(o, sc, al, t){
-  if (!hgSprite) hgSprite = makeHG();
-  const Hh = 240*sc, Ww = Hh*640/900;
-  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = al*(.93 + .07*Math.sin(t*1.3));
-  g.translate(cx + o.x*sc, cy + o.y*sc); g.rotate(-.28 + Math.sin(t*.15)*.02); g.drawImage(hgSprite, -Ww/2, -Hh/2, Ww, Hh); g.restore();
+  if (!hgSprite) return;
+  const k = 270*sc/SH;
+  g.save(); g.globalCompositeOperation = 'lighter';
+  g.translate(cx + o.x*sc, cy + o.y*sc); g.rotate(-.28 + Math.sin(t*.15)*.02); g.scale(k, k);
+  g.globalAlpha = al; glow(0, 0, 430, '60,110,230', .09);
+  g.globalAlpha = al*(.92 + .08*Math.sin(t*1.3)); g.drawImage(hgSprite, -SW/2, -SH/2);
+  const z = 1.02 + .01*Math.sin(t*.6);   // segunda camada que "respira"
+  g.globalAlpha = al*(.16 + .1*Math.sin(t*.9)); g.drawImage(hgSprite, -SW/2*z, -SH/2*z, SW*z, SH*z);
+  HGS.forEach(s => { g.globalAlpha = al*(.25 + .75*Math.abs(Math.sin(t*s.s + s.p))); glow(s.x, s.y, s.r*1.8, '215,230,255', .9); });
+  const pu = .85 + .15*Math.sin(t*2.1);
+  g.globalAlpha = al; glow(0, 0, 80, '255,185,130', .5*pu); glow(0, 0, 26, '255,255,255', .95);
+  g.strokeStyle = 'rgba(255,225,190,.32)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-130*pu, 0); g.lineTo(130*pu, 0); g.moveTo(0, -85*pu); g.lineTo(0, 85*pu); g.stroke();
+  g.restore();
 }
 function draw2(now){
   if (tp2 === null) tp2 = now;
   const t = (now - tp2)/1000, f = F*m, u = clamp(t/TRAVEL2), camz = ZN*(1 - Math.pow(1-u, 2.2)), speed = camz - pz;
+  const pan = sm(clamp((t - (TRAVEL2 - 4))/3.5)), land = W > H*1.1, cx0 = cx, cy0 = cy;   // desloca a nebulosa p/ abrir espaço à carta
+  cx = cx0 + ((land ? W*.27 : W/2) - cx0)*pan; cy = cy0 + ((land ? H/2 : H*.27) - cy0)*pan;
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = '#04050c'; g.fillRect(0, 0, W, H);
   bg.forEach(s => { g.globalAlpha = .3 + .5*Math.sin(t*s.s + s.p)**2; g.fillStyle = '#fff'; g.beginPath(); g.arc(s.x, s.y, s.r, 0, TAU); g.fill(); });
   g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
@@ -296,15 +346,16 @@ function draw2(now){
       glow(cx + o.x*sc, cy + o.y*sc, o.R*sc, `${c>>16},${(c>>8)&255},${c&255}`, .10*al);
     } else if (o.k === 'hg') hourglass(o, sc, al, t); else if (o.k === 'p') planet(o, sc, al); else star(o, sc, al);
   });
+  cx = cx0; cy = cy0;
   g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   if (t > 6 && !c1){ c1 = 1; setCap("A Nebulosa da Ampulheta se aproxima…"); }
-  if (t > TRAVEL2 - 4 && !c2){ c2 = 1; cap.style.bottom = 'auto'; cap.style.top = 'calc(6% + env(safe-area-inset-top,0px))'; setCap('Nebulosa da Ampulheta · MyCn18'); showMsg(); }
+  if (t > TRAVEL2 - 4 && !c2){ c2 = 1; cap.classList.add('side'); cap.style.bottom = 'auto'; cap.style.top = 'calc(6% + env(safe-area-inset-top,0px))'; setCap('Nebulosa da Ampulheta · MyCn18'); showMsg(); }
 }
 
 function play(){
-  clearInterval(typer); typer = null; clearTimeout(p2timer); clearInterval(typer2); tms.forEach(clearTimeout); tms = []; mode = 1; cap.style.top = ''; cap.style.bottom = '';
+  clearInterval(typer); typer = null; clearTimeout(p2timer); tms.forEach(clearTimeout); tms = []; mode = 1; cap.style.top = ''; cap.style.bottom = ''; cap.classList.remove('side');
   rings = []; lastRing = 0; capIdx = 0; t0 = null; pz = 0;
-  code2El.classList.remove('on'); again2.style.opacity = 0; pre2.innerHTML = '';
+  code2El.classList.remove('on'); again2.style.opacity = 0; letter.innerHTML = '';
   codeEl.classList.remove('on'); dim.style.opacity = 0; again.style.opacity = 0; pre.innerHTML = '';
   burst(); const was = running; running = true; if (!was) requestAnimationFrame(frame);
 }
